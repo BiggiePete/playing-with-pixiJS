@@ -1,0 +1,170 @@
+<!doctype html>
+<html>
+
+<head>
+	<script src="https://pixijs.download/release/pixi.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
+</head>
+<p id="debug">Mouse position</p>
+
+<body>
+
+	<script>
+
+		WebFont.load({
+			google: {
+				families: ['Readex Pro']
+			}
+		});
+		const num_balls = 2500;
+		let app = new PIXI.Application({
+			width: 768,
+			height: 768,
+			antialias: true,
+			backgroundColor: 0x050A2f,
+		});
+		const loader = new PIXI.Loader();
+		const Container = new PIXI.Container();
+		// init ball vars
+		let r = 5; // the radius of the ball
+		let width = app.renderer.width, height = app.renderer.height - (r * 2); // the width and height of the app with safe space for the balls
+		let min_x = r, max_x = width - (r * 2);
+		let min_y = r, max_y = height - r;
+		function Vector(angle, magnitude) {
+			this.angle = angle;
+			this.magnitude = magnitude;
+			this.xMagnitude = magnitude * Math.cos(angle);
+			this.yMagnitude = magnitude * Math.sin(angle * -1);
+		}
+		function ballInfo(r, x, y, vector, color, seed) {
+			this.r = r
+			this.x = x;
+			this.y = y;
+			this.vector = vector;
+			this.color = color;
+			this.seed = seed;
+		}
+		var logo = PIXI.Sprite.from('./LOGO.png');
+		logo.anchor.set(0.5);
+		logo.width = 256;
+		logo.height = 256;
+		app.stage.hitArea = app.screen;
+		app.stage.interactive = true;
+		var mousePos;
+		function Mouse(x, y) {
+			this.x = x;
+			this.y = y;
+		}
+		app.stage.on('mousemove', function (e) {
+			mousePos = new Mouse(e.data.global.x, e.data.global.y);
+		});
+		var balls = new Array(num_balls)
+		window.onresize = function () { resize_handler(); }
+		resize_handler();
+		function resize_handler() {
+			app.renderer.resize(window.innerWidth - 15, app.screen.height);
+			width = app.renderer.width;
+			height = app.renderer.height - (r * 2);
+			max_y = height - r;
+			max_x = width - r;
+		}
+		for (let i = 0; i < balls.length; i++) {
+			var _r = Math.random() * 2;
+			tmp_vect = new Vector(rad(Math.random() * 360), (Math.random() * 2) / 5); // all math is in radians
+			color = 0xf2f2f2;
+			balls[i] = new ballInfo(
+				_r,
+				Math.floor(Math.random() * width),
+				Math.floor(Math.random() * height),
+				tmp_vect,
+				color,
+				Math.random() * num_balls);
+		}
+		document.body.appendChild(app.view);
+		let graphics = new PIXI.Graphics();
+		var k = 0;
+		app.ticker.add((delta) => {
+			graphics.clear();
+			BallPhysics(delta);
+			BallLineConnect(delta)
+			logo.position.x = width / 2;
+			logo.position.y = height / 2;
+			app.stage.addChild(graphics, logo);
+		});
+		function BallLineConnect(delta) {
+
+		}
+
+
+
+
+		function BallPhysics(delta) {
+			for (let i = 0; i < num_balls; i++) { // init multiple balls
+				//handle collisions with the walls and such
+				if (deg(balls[i].vector.angle) < 0) {
+					balls[i].vector = new Vector(rad(deg(balls[i].vector.angle) + 360), balls[i].vector.magnitude)
+				}
+
+				if (balls[i].x > max_x + (2 * r)) { // right wall
+					if (deg(balls[i].vector.angle) > 0 && deg(balls[i].vector.angle) < 90) {
+						balls[i].vector = new Vector(rad(180 - Math.abs(deg(balls[i].vector.angle) + 360)), balls[i].vector.magnitude);
+					} else if (deg(balls[i].vector.angle) > 270 && deg(balls[i].vector.angle) < 360) {
+						balls[i].vector = new Vector(rad(180 + Math.abs(deg(balls[i].vector.angle) - 360)), balls[i].vector.magnitude);
+					}
+				}
+				else if (balls[i].x < (r * -2)) { // left wall
+					//balls[i].color = 0xA6763C;
+					if (deg(balls[i].vector.angle) > 90 && deg(balls[i].vector.angle) < 180) {
+						balls[i].vector = new Vector(rad(180 - Math.abs(deg(balls[i].vector.angle) + 360)), balls[i].vector.magnitude);
+					} else if (deg(balls[i].vector.angle) > 180 && deg(balls[i].vector.angle) < 270) {
+						balls[i].vector = new Vector(rad(180 + Math.abs(deg(balls[i].vector.angle) - 360)), balls[i].vector.magnitude);
+					}
+				}
+				else if (balls[i].y > max_y + (4 * r)) { // floor
+					//balls[i].color = 0x0D0D0D;
+					if (deg(balls[i].vector.angle) > 270 && deg(balls[i].vector.angle) < 360) {
+						balls[i].vector = new Vector(rad(Math.abs(deg(balls[i].vector.angle) - 360)), balls[i].vector.magnitude);
+					}
+					else if ((deg(balls[i].vector.angle) > 180 && deg(balls[i].vector.angle) < 270)) {
+						balls[i].vector = new Vector(rad(Math.abs(deg(balls[i].vector.angle) - 360)), balls[i].vector.magnitude);
+					}
+				}
+				else if (balls[i].y < (r * -2)) { // ceiling
+					//balls[i].color = 0x0D0D0D;
+					if (deg(balls[i].vector.angle) > 0 && deg(balls[i].vector.angle) < 90) {
+						balls[i].vector = new Vector(rad(Math.abs(deg(balls[i].vector.angle) - 360)), balls[i].vector.magnitude);
+					}
+					else if (deg(balls[i].vector.angle) > 90 && deg(balls[i].vector.angle) < 180) {
+						balls[i].vector = new Vector(rad(Math.abs(deg(balls[i].vector.angle) - 360)), balls[i].vector.magnitude);
+					}
+				}
+				// apply vector magnitudes to the balls
+				balls[i].x += balls[i].vector.xMagnitude; //change the x depending on the vector
+				balls[i].y += balls[i].vector.yMagnitude; //change the y depending on the vector
+				k += delta / 300000;
+				graphics.lineStyle(0);
+				graphics.beginFill(balls[i].color, Math.cos(k + balls[i].seed));
+				graphics.drawCircle(balls[i].x, balls[i].y, balls[i].r);
+				graphics.endFill();
+			}
+		}
+
+		function deg(rad) {
+			return (rad * 180) / Math.PI;
+		}
+		function rad(deg) {
+			return (deg * Math.PI) / 180
+		}
+		function Hex(int) {
+			return int.toString(16);
+		}
+		function Int(hex) {
+			return parseInt(hex, 16);
+		}
+		function lerp(v0, v1, t) {
+			return v0 * (1 - t) + v1 * t
+		}
+	</script>
+</body>
+
+</html>
