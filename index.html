@@ -13,7 +13,7 @@
 
 		WebFont.load({
 			google: {
-				families: ['Readex Pro', 'Montserrat']
+				families: ['Readex Pro',]
 			}
 		});
 		const num_balls = 750;
@@ -112,6 +112,7 @@
 		let line = new PIXI.Graphics();
 		var k = 0;
 		app.ticker.add((delta) => {
+			glowgrafx.clear();
 			graphics.clear();
 			line.clear();
 			BallPhysics(delta);
@@ -137,18 +138,19 @@
 			balls.forEach(ball => {
 				if (distancetocursor(ball.x, ball.y) < cursorRadius) {
 					ball.color = 0xFFD700;
+					Glow(ball.x,ball.y,0xFFD700,4,3,true);
 					line.position = new PIXI.Point(0, 0);
 					line.lineStyle(0.5, linecolor)
 					line.moveTo(ball.x, ball.y);
 					line.lineTo(mousePos.x, mousePos.y);
 					if (mousePos.down) {
-						Glow(mousePos.x, mousePos.y, 0xFFD700, 4, 8, true);
+						Glow(mousePos.x, mousePos.y, 0xFFD700, 2, 5, true);
 						linecolor = 0xFFD700;
 						ball.x = lerp(ball.x, mousePos.x, delta / 100);
 						ball.y = lerp(ball.y, mousePos.y, delta / 100);
 					}
 					else {
-						Glow(mousePos.x, mousePos.y, 0x4a4a4a, 4, 8, true);
+						Glow(mousePos.x, mousePos.y, 0x4a4a4a, 2, 5, true);
 						linecolor = 0xf2f2f2;
 					}
 				}
@@ -245,18 +247,14 @@
 		let glowgrafx = new PIXI.Graphics();
 		function Glow(x, y, color, resolution, radius, enable) {
 			if (enable) {
-				glowgrafx.clear();
 				let step = radius / resolution;
 				for (let i = 0; i < resolution; i++) {
 					glowgrafx.lineStyle(0);
-					glowgrafx.beginFill(color, (1 / radius));
+					glowgrafx.beginFill(color, (1 / resolution));
 					glowgrafx.drawCircle(x, y, step);
 					step = step + step;
 				}
 				app.stage.addChild(glowgrafx);
-			}
-			else {
-				glowgrafx.clear();
 			}
 		}
 		function deg(rad) {
