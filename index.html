@@ -26,19 +26,31 @@
 		let width = app.renderer.width, height = app.renderer.height - (r * 2); // the width and height of the app with safe space for the balls
 		let min_x = r, max_x = width - (r * 2);
 		let min_y = r, max_y = height - r;
-		function Vector(angle, magnitude) {
-			this.angle = angle;
-			this.magnitude = magnitude;
-			this.xMagnitude = magnitude * Math.cos(angle);
-			this.yMagnitude = magnitude * Math.sin(angle * -1);
+		class Vector {
+			constructor(angle, magnitude) {
+				this.angle = angle;
+				this.magnitude = magnitude;
+				this.xMagnitude = magnitude * Math.cos(angle);
+				this.yMagnitude = magnitude * Math.sin(angle * -1);
+			}
 		}
-		function ballInfo(r, x, y, vector, color, seed) {
-			this.r = r
-			this.x = x;
-			this.y = y;
-			this.vector = vector;
-			this.color = color;
-			this.seed = seed;
+		class ballInfo {
+			constructor(r, x, y, vector, color, seed) {
+				this.r = r
+				this.x = x;
+				this.y = y;
+				this.vector = vector;
+				this.color = color;
+				this.seed = seed;
+			}
+		}
+		class Mouse {
+			constructor(x, y, down, up) {
+				this.x = x;
+				this.y = y;
+				this.down = down;
+				this.up = up;
+			}
 		}
 		var logo = PIXI.Sprite.from('./LOGO.png');
 		logo.anchor.set(0.5);
@@ -48,13 +60,7 @@
 		app.stage.hitArea = app.screen;
 		app.stage.interactive = true;
 		bringToFront(logo)
-
-		function Mouse(x, y, down, up) {
-			this.x = x;
-			this.y = y;
-			this.down = down;
-			this.up = up;
-		}
+		let vect = new Vector();
 		let mousePos = new Mouse(0, 0, false, true);
 		app.stage.on('mousemove', function (e) {
 			mousePos.x = e.data.global.x;
@@ -158,8 +164,6 @@
 				return Math.sqrt(Math.pow(mousePos.x - ballx, 2) + Math.pow(mousePos.y - bally, 2));
 			}
 		}
-
-
 		app.stage.on("mousedown", function (e) {
 			mousePos.down = true;
 			mousePos.up = false;
