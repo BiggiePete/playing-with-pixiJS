@@ -5,7 +5,7 @@
 	<script src="https://pixijs.download/release/pixi.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
 </head>
-<p id="debug">Mouse position</p>
+<p id="debug">Debug Data</p>
 
 <body>
 
@@ -16,7 +16,7 @@
 				families: ['Readex Pro']
 			}
 		});
-		const num_balls = 2500;
+		const num_balls = 500;
 		let app = new PIXI.Application({
 			width: 768,
 			height: 768,
@@ -50,13 +50,15 @@
 		logo.height = 256;
 		app.stage.hitArea = app.screen;
 		app.stage.interactive = true;
-		var mousePos;
+
 		function Mouse(x, y) {
 			this.x = x;
 			this.y = y;
 		}
+		let mousePos = new Mouse();
 		app.stage.on('mousemove', function (e) {
-			mousePos = new Mouse(e.data.global.x, e.data.global.y);
+			mousePos.x = e.data.global.x;
+			mousePos.y = e.data.global.y;
 		});
 		var balls = new Array(num_balls)
 		window.onresize = function () { resize_handler(); }
@@ -69,15 +71,14 @@
 			max_x = width - r;
 		}
 		for (let i = 0; i < balls.length; i++) {
-			var _r = Math.random() * 2;
+			var _r = Math.random() * 3.;
 			tmp_vect = new Vector(rad(Math.random() * 360), (Math.random() * 2) / 5); // all math is in radians
-			color = 0xffd;
 			balls[i] = new ballInfo(
 				_r,
 				Math.floor(Math.random() * width),
 				Math.floor(Math.random() * height),
 				tmp_vect,
-				color,
+				0xf2f2f2,
 				Math.random() * num_balls);
 		}
 		document.body.appendChild(app.view);
@@ -86,16 +87,37 @@
 		app.ticker.add((delta) => {
 			graphics.clear();
 			BallPhysics(delta);
-			BallLineConnect(delta)
+			CursorHandler(delta)
 			logo.position.x = width / 2;
 			logo.position.y = height / 2;
 			app.stage.addChild(logo);
 			app.stage.addChild(graphics);
 		});
-		function BallLineConnect(delta) {
+		let cursorRadius = 70;
 
+		function CursorHandler(delta) {
+			graphics.lineStyle(1, 0xf2f2f2);
+			graphics.drawCircle(mousePos.x, mousePos.y, cursorRadius);
+			graphics.endFill(); // debug circle to understand where everything is around the cursor and it's sphere of influence
+
+			//detect if the all is within the radius of the cursor
+
+			balls.forEach(ball => {
+				if (distancetocursor(ball.x,ball.y) < cursorRadius) {
+					let line = new PIXI.Graphics();
+					line.position = new PIXI.Point(0,0);
+					line.beginFill(0xf2f2f2,1)
+					line.moveTo(ball.x,ball.y);
+					line.lineTo(mousePos.x,mousePos.y);
+					app.stage.addChild(line);
+				}
+			});
+
+			function distancetocursor(ballx,bally){
+				return Math.sqrt(Math.pow(mousePos.x - ballx,2) + Math.pow(mousePos.y - bally,2));
+			}
 		}
-
+		
 
 
 
@@ -144,7 +166,7 @@
 				balls[i].y += balls[i].vector.yMagnitude; //change the y depending on the vector
 				k += delta / 300000;
 				graphics.lineStyle(0);
-				graphics.beginFill(balls[i].color, Math.cos(k + balls[i].seed));
+				graphics.beginFill(balls[i].color, 0.6);
 				graphics.drawCircle(balls[i].x, balls[i].y, balls[i].r);
 				graphics.endFill();
 			}
