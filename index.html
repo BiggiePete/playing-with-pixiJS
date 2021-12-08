@@ -71,7 +71,7 @@
 		for (let i = 0; i < balls.length; i++) {
 			var _r = Math.random() * 2;
 			tmp_vect = new Vector(rad(Math.random() * 360), (Math.random() * 2) / 5); // all math is in radians
-			color = 0xf2f2f2;
+			color = 0xffd;
 			balls[i] = new ballInfo(
 				_r,
 				Math.floor(Math.random() * width),
@@ -89,7 +89,8 @@
 			BallLineConnect(delta)
 			logo.position.x = width / 2;
 			logo.position.y = height / 2;
-			app.stage.addChild(graphics, logo);
+			app.stage.addChild(logo);
+			app.stage.addChild(graphics);
 		});
 		function BallLineConnect(delta) {
 
