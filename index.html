@@ -2,20 +2,16 @@
 <html>
 
 <head>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap" rel="stylesheet">
 	<script src="https://pixijs.download/release/pixi.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
 </head>
 <p id="debug">Debug Data</p>
 
 <body>
 
 	<script>
-
-		WebFont.load({
-			google: {
-				families: ['Readex Pro',]
-			}
-		});
 		const num_balls = 750;
 		let app = new PIXI.Application({
 			width: 768,
@@ -89,7 +85,7 @@
 		let title = new PIXI.Text(
 			'ROBOTICS',
 			{
-				fontFamily: 'Readex Pro',
+				fontFamily: 'Montserrat',
 				fontSize: 50,
 				fill: 0xf2f2f2,
 			}
@@ -97,7 +93,7 @@
 		let subtitle = new PIXI.Text(
 			'CENTRAL FLORIDA',
 			{
-				fontFamily: 'Readex Pro',
+				fontFamily: 'Montserrat',
 				fontSize: 50,
 				fill: 0xf2f2f2,
 			}
@@ -123,7 +119,7 @@
 			subtitle.position.y = (height / 2) + 140;
 			logo.position.x = width / 2;
 			logo.position.y = height / 2;
-			app.stage.addChild(graphics, line, logo, title, subtitle);
+			app.stage.addChild(graphics, line, title, subtitle, logo);
 		});
 		let cursorRadius = 70;
 		let linecolor = 0xf2f2f2;
@@ -138,7 +134,7 @@
 			balls.forEach(ball => {
 				if (distancetocursor(ball.x, ball.y) < cursorRadius) {
 					ball.color = 0xFFD700;
-					Glow(ball.x,ball.y,0xFFD700,4,3,true);
+					Glow(ball.x, ball.y, 0xFFD700, 4, 3, true);
 					line.position = new PIXI.Point(0, 0);
 					line.lineStyle(0.5, linecolor)
 					line.moveTo(ball.x, ball.y);
