@@ -5,6 +5,9 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&display=swap" rel="stylesheet">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Comfortaa&display=swap" rel="stylesheet">
 	<script src="https://pixijs.download/release/pixi.js"></script>
 </head>
 <p id="debug">Debug Data</p>
@@ -12,13 +15,22 @@
 <body>
 
 	<script>
+		function Fonts(){
+			this.Primary_font = "Comfortaa";
+			this.Secondary_font = "Montserrat"
+		}
 		const num_balls = 750;
+		var Primary_font = new Fonts().Primary_font;
+		//const Secondary_font = "Monserrat";
+		var Secondary_font = new Fonts().Secondary_font
+		console.log(Primary_font);
 		let app = new PIXI.Application({
 			width: 768,
 			height: 768,
 			antialias: true,
-			backgroundColor: 0x050A2f,
+			backgroundColor: 0x070707,
 		});
+		app.boundsPadding = 0;
 		const loader = new PIXI.Loader();
 		const Container = new PIXI.Container();
 		// init ball vars
@@ -70,7 +82,7 @@
 		window.onresize = function () { resize_handler(); }
 		resize_handler();
 		function resize_handler() {
-			app.renderer.resize(window.innerWidth - 15, app.screen.height);
+			app.renderer.resize(window.innerWidth - 15, window.innerHeight);
 			width = app.renderer.width;
 			height = app.renderer.height - (r * 2);
 			max_y = height - r;
@@ -91,7 +103,7 @@
 		let title = new PIXI.Text(
 			'ROBOTICS',
 			{
-				fontFamily: 'Montserrat',
+				fontFamily: Primary_font,
 				fontSize: 50,
 				fill: 0xf2f2f2,
 			}
@@ -99,7 +111,7 @@
 		let subtitle = new PIXI.Text(
 			'CENTRAL FLORIDA',
 			{
-				fontFamily: 'Montserrat',
+				fontFamily: Primary_font,
 				fontSize: 50,
 				fill: 0xf2f2f2,
 			}
@@ -110,10 +122,13 @@
 		subtitle.anchor.set(0.5);
 
 
+
 		let graphics = new PIXI.Graphics();
 		let line = new PIXI.Graphics();
 		var k = 0;
 		app.ticker.add((delta) => {
+			//ButtonHandler(20,20,60,20,"TEXT");
+			//ButtonHandler(100,20,60,20,"LOL");
 			glowgrafx.clear();
 			graphics.clear();
 			line.clear();
@@ -126,9 +141,11 @@
 			logo.position.x = width / 2;
 			logo.position.y = height / 2;
 			app.stage.addChild(graphics, line, title, subtitle, logo);
+			document.getElementById("debug").innerHTML = 30/delta;
 		});
 		let cursorRadius = 70;
 		let linecolor = 0xf2f2f2;
+	
 		function CursorHandler(delta) {
 			graphics.lineStyle(0);
 			graphics.beginFill(0xf2f2f2)
