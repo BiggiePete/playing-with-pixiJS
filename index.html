@@ -15,15 +15,14 @@
 <body>
 
 	<script>
-		function Fonts(){
+		function Fonts() {
 			this.Primary_font = "Comfortaa";
 			this.Secondary_font = "Montserrat"
 		}
-		const num_balls = 750;
+		const num_balls = 500;
 		var Primary_font = new Fonts().Primary_font;
 		//const Secondary_font = "Monserrat";
 		var Secondary_font = new Fonts().Secondary_font
-		console.log(Primary_font);
 		let app = new PIXI.Application({
 			width: 768,
 			height: 768,
@@ -90,7 +89,7 @@
 		}
 		for (let i = 0; i < balls.length; i++) {
 			var _r = 0.5 + Math.random() * 1.5;
-			tmp_vect = new Vector(rad(Math.random() * 360), (Math.random() * 2) / 50); // all math is in radians
+			tmp_vect = new Vector(rad(Math.random() * 360), (Math.random() * 8) / 50); // all math is in radians
 			balls[i] = new ballInfo(
 				_r,
 				Math.floor(Math.random() * width),
@@ -120,18 +119,16 @@
 		title.anchor.set(0.5);
 		subtitle.resolution = 2;
 		subtitle.anchor.set(0.5);
-
-
-
 		let graphics = new PIXI.Graphics();
 		let line = new PIXI.Graphics();
+		let glowgrafx = new PIXI.Graphics();
 		var k = 0;
 		app.ticker.add((delta) => {
-			//ButtonHandler(20,20,60,20,"TEXT");
-			//ButtonHandler(100,20,60,20,"LOL");
 			glowgrafx.clear();
 			graphics.clear();
 			line.clear();
+
+			Buttons();
 			BallPhysics(delta);
 			CursorHandler(delta);
 			title.position.x = width / 2;
@@ -141,16 +138,71 @@
 			logo.position.x = width / 2;
 			logo.position.y = height / 2;
 			app.stage.addChild(graphics, line, title, subtitle, logo);
-			document.getElementById("debug").innerHTML = 30/delta;
+
 		});
+		var AboutText = new PIXI.Text(
+			"ABOUT",
+			{
+				fontFamily: Secondary_font,
+				fontSize: 24,
+				fill: 0xf2f2f2,
+			}
+		);
+		var OfficersText = new PIXI.Text(
+			"OFFICERS",
+			{
+				fontFamily: Secondary_font,
+				fontSize: 24,
+				fill: 0xf2f2f2,
+			}
+		);
+		class Point {
+			constructor(x, y) {
+				this.x = x;
+				this.y = y;
+			}
+			set(a) {
+				this.x = a;
+				this.y = a;
+			}
+		}
+		class Button {
+			constructor(xPos, yPos, BWidth, BHeight, textObj) {
+				this.ButtonRend = new PIXI.Graphics();
+				this.position = new Point(xPos, yPos);
+				this.BWidth = BWidth;
+				this.BHeight = BHeight;
+				this.textObj = textObj;
+				this.Width = xPos + BWidth
+			}
+			Render() {
+				this.ButtonRend.clear();
+				this.ButtonRend.interactive = true;
+				this.ButtonRend.lineStyle(1, 0xf2f2f2);
+				this.ButtonRend.drawRect(
+					this.position.x,
+					this.position.y,
+					this.BWidth,
+					this.BHeight,
+				);
+				this.ButtonRend.hitArea = PIXI.Rectangle(this.position.x, this.position.y, this.BWidth + this.position.x, this.BHeight + this.position.y);
+				this.textObj.anchor.set(0.5);
+				this.textObj.position.x = this.position.x + (this.BWidth / 2)
+				this.textObj.position.y = this.position.y + (this.BHeight / 2)
+				app.stage.addChild(this.ButtonRend, this.textObj);
+			}
+		}
+		var AboutButton = new Button(20, 20, 160, 40, AboutText);
+		var OfficersButton = new Button(AboutButton.Width + 40, AboutButton.position.y, AboutButton.BWidth, AboutButton.BHeight, OfficersText);
+		function Buttons() {
+			AboutButton.Render();
+			OfficersButton.Render();
+		}
 		let cursorRadius = 70;
 		let linecolor = 0xf2f2f2;
-	
 		function CursorHandler(delta) {
 			graphics.lineStyle(0);
 			graphics.beginFill(0xf2f2f2)
-			graphics.drawCircle(mousePos.x, mousePos.y,);
-			graphics.endFill(); // debug circle to understand where everything is around the cursor and it's sphere of influence
 
 			//detect if the all is within the radius of the cursor
 
@@ -159,7 +211,7 @@
 					ball.color = 0xFFD700;
 					Glow(ball.x, ball.y, 0xFFD700, 4, 3, true);
 					line.position = new PIXI.Point(0, 0);
-					line.lineStyle(0.5, linecolor)
+					line.lineStyle(0.5 / map(distancetocursor(ball.x, ball.y), 0, 70, 0, 1), linecolor)
 					line.moveTo(ball.x, ball.y);
 					line.lineTo(mousePos.x, mousePos.y);
 					if (mousePos.down) {
@@ -261,7 +313,6 @@
 				} parent.children.splice(0, 0, sprite);
 			}
 		}
-		let glowgrafx = new PIXI.Graphics();
 		function Glow(x, y, color, resolution, radius, enable) {
 			if (enable) {
 				let step = radius / resolution;
@@ -288,6 +339,9 @@
 		}
 		function lerp(v0, v1, t) {
 			return v0 * (1 - t) + v1 * t
+		}
+		function map(x, in_min, in_max, out_min, out_max) {
+			return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 		}
 	</script>
 </body>
