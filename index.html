@@ -11,14 +11,52 @@
 	<script src="https://pixijs.download/release/pixi.js"></script>
 </head>
 <p id="debug">Debug Data</p>
-
 <body>
+	<button> Click me</button>
+	<style>
+		* {
+			padding: 0;
+			margin: 0;
+		}
 
+		::-webkit-scrollbar {
+			width: 0px;
+			height: 0px;
+		}
+
+		button {
+			position: absolute;
+		}
+
+		p {
+			position: absolute;
+		}
+		canvas {
+			position: fixed;
+			z-index: -1;
+			top: 0;
+			left: 0;
+			transform: translate(calc(50vw - 50%));
+		}
+	</style>
 	<script>
 		function Fonts() {
 			this.Primary_font = "Comfortaa";
 			this.Secondary_font = "Montserrat"
 		}
+		class NavBar {
+			constructor(height) {
+				this.Renderer = new PIXI.Graphics();
+				this.height = height;
+			}
+			Render() {
+				this.Renderer.lineStyle(1, 0xf2f2f2);
+				this.Renderer.moveTo(0, this.height);
+				this.Renderer.lineTo(app.renderer.width, this.height);
+				app.stage.addChild(this.Renderer)
+			}
+		}
+
 		const num_balls = 500;
 		var Primary_font = new Fonts().Primary_font;
 		//const Secondary_font = "Monserrat";
@@ -35,8 +73,9 @@
 		// init ball vars
 		let r = 5; // the radius of the ball
 		let width = app.renderer.width, height = app.renderer.height - (r * 2); // the width and height of the app with safe space for the balls
+		const navBar = new NavBar(70);
 		let min_x = r, max_x = width - (r * 2);
-		let min_y = r, max_y = height - r;
+		let min_y = r + navBar.height, max_y = height - r;
 		class Vector {
 			constructor(angle, magnitude) {
 				this.angle = angle;
@@ -63,14 +102,8 @@
 				this.up = up;
 			}
 		}
-		var logo = PIXI.Sprite.from('./LOGO.png');
-		logo.anchor.set(0.5);
-		logo.width = 256;
-		logo.height = 256;
-		logo.tint = 0xFFD700
 		app.stage.hitArea = app.screen;
 		app.stage.interactive = true;
-		bringToFront(logo)
 		let vect = new Vector();
 		let mousePos = new Mouse(0, 0, false, true);
 		app.stage.on('mousemove', function (e) {
@@ -81,9 +114,9 @@
 		window.onresize = function () { resize_handler(); }
 		resize_handler();
 		function resize_handler() {
-			app.renderer.resize(window.innerWidth - 15, window.innerHeight);
+			app.renderer.resize(window.innerWidth, window.innerHeight);
 			width = app.renderer.width;
-			height = app.renderer.height - (r * 2);
+			height = app.renderer.height;
 			max_y = height - r;
 			max_x = width - r;
 		}
@@ -92,126 +125,46 @@
 			tmp_vect = new Vector(rad(Math.random() * 360), (Math.random() * 8) / 50); // all math is in radians
 			balls[i] = new ballInfo(
 				_r,
-				Math.floor(Math.random() * width),
-				Math.floor(Math.random() * height),
+				Math.floor(Math.random() * max_x),
+				Math.floor(Math.max(Math.random() * max_y, min_y)),
 				tmp_vect,
 				0xf2f2f2,
 				Math.random() * num_balls);
 		}
 		document.body.appendChild(app.view);
-		let title = new PIXI.Text(
-			'ROBOTICS',
-			{
-				fontFamily: Primary_font,
-				fontSize: 50,
-				fill: 0xf2f2f2,
-			}
-		);
-		let subtitle = new PIXI.Text(
-			'CENTRAL FLORIDA',
-			{
-				fontFamily: Primary_font,
-				fontSize: 50,
-				fill: 0xf2f2f2,
-			}
-		);
-		title.resolution = 2;
-		title.anchor.set(0.5);
-		subtitle.resolution = 2;
-		subtitle.anchor.set(0.5);
 		let graphics = new PIXI.Graphics();
 		let line = new PIXI.Graphics();
 		let glowgrafx = new PIXI.Graphics();
 		var k = 0;
 		app.ticker.add((delta) => {
+			document.getElementById("debug").innerHTML = "Webpage Width = " + app.renderer.width;
 			glowgrafx.clear();
 			graphics.clear();
 			line.clear();
-
-			Buttons();
+			ShowNav();
 			BallPhysics(delta);
 			CursorHandler(delta);
-			title.position.x = width / 2;
-			title.position.y = (height / 2) - 140;
-			subtitle.position.x = width / 2;
-			subtitle.position.y = (height / 2) + 140;
-			logo.position.x = width / 2;
-			logo.position.y = height / 2;
-			app.stage.addChild(graphics, line, title, subtitle, logo);
-
+			app.stage.addChild(graphics, line);
 		});
-		var AboutText = new PIXI.Text(
-			"ABOUT",
-			{
-				fontFamily: Secondary_font,
-				fontSize: 24,
-				fill: 0xf2f2f2,
-			}
-		);
-		var OfficersText = new PIXI.Text(
-			"OFFICERS",
-			{
-				fontFamily: Secondary_font,
-				fontSize: 24,
-				fill: 0xf2f2f2,
-			}
-		);
-		class Point {
-			constructor(x, y) {
-				this.x = x;
-				this.y = y;
-			}
-			set(a) {
-				this.x = a;
-				this.y = a;
-			}
+
+		function ShowNav() {
+			navBar.Render();
 		}
-		class Button {
-			constructor(xPos, yPos, BWidth, BHeight, textObj) {
-				this.ButtonRend = new PIXI.Graphics();
-				this.position = new Point(xPos, yPos);
-				this.BWidth = BWidth;
-				this.BHeight = BHeight;
-				this.textObj = textObj;
-				this.Width = xPos + BWidth
-			}
-			Render() {
-				this.ButtonRend.clear();
-				this.ButtonRend.interactive = true;
-				this.ButtonRend.lineStyle(1, 0xf2f2f2);
-				this.ButtonRend.drawRect(
-					this.position.x,
-					this.position.y,
-					this.BWidth,
-					this.BHeight,
-				);
-				this.ButtonRend.hitArea = PIXI.Rectangle(this.position.x, this.position.y, this.BWidth + this.position.x, this.BHeight + this.position.y);
-				this.textObj.anchor.set(0.5);
-				this.textObj.position.x = this.position.x + (this.BWidth / 2)
-				this.textObj.position.y = this.position.y + (this.BHeight / 2)
-				app.stage.addChild(this.ButtonRend, this.textObj);
-			}
-		}
-		var AboutButton = new Button(20, 20, 160, 40, AboutText);
-		var OfficersButton = new Button(AboutButton.Width + 40, AboutButton.position.y, AboutButton.BWidth, AboutButton.BHeight, OfficersText);
-		function Buttons() {
-			AboutButton.Render();
-			OfficersButton.Render();
-		}
+
 		let cursorRadius = 70;
 		let linecolor = 0xf2f2f2;
 		function CursorHandler(delta) {
 			graphics.lineStyle(0);
 			graphics.beginFill(0xf2f2f2)
 
-			//detect if the all is within the radius of the cursor
+			//detect if the ball is within the radius of the cursor
 
 			balls.forEach(ball => {
 				if (distancetocursor(ball.x, ball.y) < cursorRadius) {
 					ball.color = 0xFFD700;
 					Glow(ball.x, ball.y, 0xFFD700, 4, 3, true);
 					line.position = new PIXI.Point(0, 0);
-					line.lineStyle(0.5 / map(distancetocursor(ball.x, ball.y), 0, 70, 0, 1), linecolor)
+					line.lineStyle(1 / map(distancetocursor(ball.x, ball.y), 0, 70, 0.2, 3), linecolor)
 					line.moveTo(ball.x, ball.y);
 					line.lineTo(mousePos.x, mousePos.y);
 					if (mousePos.down) {
@@ -229,9 +182,10 @@
 					ball.color = 0xf2f2f2;
 				}
 			});
-			function distancetocursor(ballx, bally) {
-				return Math.sqrt(Math.pow(mousePos.x - ballx, 2) + Math.pow(mousePos.y - bally, 2));
-			}
+
+		}
+		function distancetocursor(x, y) {
+			return Math.sqrt(Math.pow(mousePos.x - x, 2) + Math.pow(mousePos.y - y, 2));
 		}
 		app.stage.on("mousedown", function (e) {
 			mousePos.down = true;
@@ -241,7 +195,6 @@
 			mousePos.down = false;
 			mousePos.up = true;
 		}); // mouse has let go
-
 
 
 
@@ -276,7 +229,7 @@
 						balls[i].vector = new Vector(rad(Math.abs(deg(balls[i].vector.angle) - 360)), balls[i].vector.magnitude);
 					}
 				}
-				else if (balls[i].y < (r * -2)) { // ceiling
+				else if (balls[i].y < min_y) { // ceiling
 					//balls[i].color = 0x0D0D0D;
 					if (deg(balls[i].vector.angle) > 0 && deg(balls[i].vector.angle) < 90) {
 						balls[i].vector = new Vector(rad(Math.abs(deg(balls[i].vector.angle) - 360)), balls[i].vector.magnitude);
@@ -293,24 +246,6 @@
 				graphics.beginFill(balls[i].color, (1 / 3) * Math.cos(k + balls[i].seed) + (2 / 3));
 				graphics.drawCircle(balls[i].x, balls[i].y, balls[i].r);
 				graphics.endFill();
-			}
-		}
-		function bringToFront(sprite, parent) {
-			var sprite = (typeof (sprite) != "undefined") ? sprite.target || sprite : this; var parent = parent || sprite.parent || { "children": false }; if (parent.children) {
-				for (var keyIndex in sprite.parent.children) {
-					if (sprite.parent.children[keyIndex] === sprite) {
-						sprite.parent.children.splice(keyIndex, 1); break;
-					}
-				} parent.children.push(sprite);
-			}
-		}
-		function sendToBack(sprite, parent) {
-			var sprite = (typeof (sprite) != "undefined") ? sprite.target || sprite : this; var parent = parent || sprite.parent || { "children": false }; if (parent.children) {
-				for (var keyIndex in sprite.parent.children) {
-					if (sprite.parent.children[keyIndex] === sprite) {
-						sprite.parent.children.splice(keyIndex, 1); break;
-					}
-				} parent.children.splice(0, 0, sprite);
 			}
 		}
 		function Glow(x, y, color, resolution, radius, enable) {
